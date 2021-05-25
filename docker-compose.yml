@@ -1,0 +1,36 @@
+version: '3.3'
+services:
+    influxdb:
+        image: influxdb:latest
+        container_name: influxdb
+        volumes:
+            - ./influx_data/data/:/var/lib/influxdb:rw
+            - ./influx_data/conf/:/etc/influxdb
+        environment:
+            - INFLUXDB_DB=telegraf
+            - INFLUXDB_HTTP_AUTH_ENABLED=true
+            - INFLUXDB_ADMIN_USER=admin
+            - INFLUXDB_ADMIN_PASSWORD=secret
+            - INFLUXDB_READ_USER=read_user
+            - INFLUXDB_READ_USER_PASSWORD=read_pass
+
+            - INFLUXDB_DATA_DIR=/var/lib/influxdb/data
+            - INFLUXDB_META_DIR=/var/lib/influxdb/meta
+        ports:
+            - "8086:8086"
+        restart: always
+
+    grafana:
+        image: grafana/grafana:latest
+        container_name: grafana_influx
+        volumes:
+            - ./grafana_data:/var/lib/grafana:rw
+            - ./grafana_data/plugins:/var/lib/grafana/plugins:rw
+        environment:
+             - GF_SECURITY_ADMIN_USER=replace_for_admin_user
+             - GF_SECURITY_ADMIN_PASSWORD=pass_for_admin_user
+        depends_on:
+            - influxdb
+        ports:
+            - "3000:3000"
+        restart: always
